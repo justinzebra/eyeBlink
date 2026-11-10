@@ -1,0 +1,10 @@
+/* 載入順序即層疊順序，請勿任意調換；responsive.css 必須放在最後。 */
+@import 'tailwindcss';
+@import './base.css';
+@import './shell.css';
+@import './components.css';
+@import './responsive.css';
+
+@theme {
+  --font-sans: 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
+}

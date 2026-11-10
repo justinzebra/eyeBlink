@@ -4,12 +4,12 @@
 
 ## 第一次使用（Windows）
 
-1. 到 [Node.js 官方網站](https://nodejs.org/zh-tw) 下載 LTS 安裝程式。依畫面安裝，保留 npm 與加入 PATH 的預設選項。建議 Node.js 24 LTS 或更新的 LTS。
-2. 安裝後重新開啟 PowerShell，輸入 `node --version` 與 `npm --version`，兩者應顯示版本。這台電腦已具備 Node.js，可直接使用。
+1. 到 [Node.js 官方網站](https://nodejs.org/zh-tw) 下載 LTS 安裝程式。依畫面安裝，保留 npm 與加入 PATH 的預設選項。**需要 Node.js 20.19 以上**（建議 22 或 24 LTS）；較舊的版本無法執行本專案使用的 Vite 7。
+2. 安裝後重新開啟 PowerShell，輸入 `node --version` 與 `npm --version`，確認版本符合上述要求。若使用 nvm-windows，可執行 `nvm install 22` 再 `nvm use 22`。
 3. 在 PowerShell 依序輸入（不用輸入程式碼框的反引號）：
 
 ```powershell
-cd D:\eyeblink
+cd C:\eyeBlink   # 換成你放專案的資料夾
 npm install
 npm run dev
 ```
@@ -32,14 +32,14 @@ npm run dev
 
 1. 啟用日間模式，設定間隔 1 分鐘、閉眼 500 毫秒、停留 300 毫秒、睜眼 500 毫秒。
 2. 修改後狀態為「尚未儲存」，套用按鈕停用。
-3. 按「儲存設定」：先顯示「儲存中」，成功後顯示「已儲存」。這時執行設定尚未變動。
+3. 按「儲存設定」：先顯示「儲存中」，成功後顯示「已儲存，尚未套用」。這時執行設定尚未變動。
 4. 按「套用設定」後才會更新模擬設備的執行參數。按「模擬執行」，觀看睜眼 → 閉眼 → 停留 → 睜眼。
 5. 等待一分鐘，觀察自動眨眼。間隔定義是開始到下一次開始，包含動作本身所需的時間。
 6. 停用日間模式，儲存並套用後，不再自動眨眼；仍可手動觸發軟體預覽。
 
 ### 夜間模式
 
-- 開啟手動夜間開關，模型應保持閉眼。關閉後恢復依排程判斷，不會強制覆蓋正在執行的夜間排程。手動指令立即生效，需按「儲存設定」才會在重啟後保留。
+- 開啟手動夜間開關，模型應保持閉眼。關閉後恢復依排程判斷，不會強制覆蓋正在執行的夜間排程。手動夜間是即時指令：立即生效、不需要儲存或套用，也不會寫入儲存區；狀態列不會因此變成「尚未儲存」，重新啟動或重新連線後一律回到關閉。
 - 啟用自動排程，設為 22:00–07:00，先只選星期一，儲存並套用。
 - 在右側「排程模擬工具」依序指定：2026/11/09 21:59（日間）、22:00（夜間）、2026/11/10 06:59（夜間）、07:00（日間）。按「前往模擬時間」觀察來源與模型。
 - 星期表示**開始日**。週一 22:00–週二 07:00 屬於週一，不需選週二。每個星期按鈕可獨立切換。
@@ -64,54 +64,74 @@ npm run dev
 
 ## 儲存、套用與關閉網頁的差異
 
-| 資料 | 位置 | 用途 |
-| --- | --- | --- |
-| 編輯中 draft | Zustand settingsStore | 表單尚未儲存的變更 |
-| 已儲存 saved | Mock Device + localStorage | 模擬設備重啟載入來源 |
-| 執行中 active | Mock Device | 模型動作與排程真正使用的設定 |
+| 資料          | 位置                       | 用途                         |
+| ------------- | -------------------------- | ---------------------------- |
+| 編輯中 draft  | settingsStore              | 表單尚未儲存的變更           |
+| 已儲存 saved  | Mock Device + localStorage | 模擬設備重啟載入來源         |
+| 執行中 active | Mock Device                | 模型動作與排程真正使用的設定 |
 
 Mock Device 的持久化鍵是 `blink-assist.mock-device.v1`，內容包含 `settings` 與設備名稱。設定介面符合 `BlinkSettings`；數值單位為毫秒，時間格式為 `HH:mm`，星期是 0（日）到 6（六）。`validateSettings` 會同時在表單與設備儲存邊界驗證。
 
-模擬版本與瀏覽器共用生命週期。**關閉網頁後無法繼續執行模擬動作**；重新開啟並連接會依持久化設定與當下時間恢復判斷，不補播關閉期間的眨眼。分頁背景節流時依時間重新計算動作。第一階段不宣稱具備真實設備的離線執行能力。請以單一分頁操作，尚未實作多分頁互斥。
+模擬版本與瀏覽器共用生命週期。**關閉網頁後無法繼續執行模擬動作**；重新開啟並連接會依持久化設定與當下時間恢復判斷，不補播關閉期間的眨眼。分頁背景節流時依時間重新計算動作。第一階段不宣稱具備真實設備的離線執行能力。
+
+同一時間只允許一個分頁連接模擬設備（以瀏覽器的 Web Locks 實作）。第二個分頁按連線時會顯示「模擬設備已在另一個分頁連線」；先在原分頁中斷連線或關閉它即可。有未儲存的修改時，關閉或重新整理分頁前瀏覽器會先詢問。目前所在頁面記錄在網址（例如 `#/night`），重新整理後會停留在同一頁。
+
+狀態列的文字由三份設定即時比對得出：「尚未儲存」（draft ≠ saved）、「已儲存，尚未套用」（saved ≠ active）、「已套用」（三者一致）。
 
 ## 專案結構
 
 ```text
 src/
-  components/      共用輸入、操作按鈕與雙眼模型
+  domain/          純邏輯，不依賴 React、store 或瀏覽器 API
+    settings.ts        設定型別、預設值、比較與複製
+    validation.ts      設定驗證與數值範圍（表單與設備共用同一份）
+    schedule.ts        夜間排程判斷
+    blinkTimeline.ts   眨眼時間軸與眼瞼姿態計算
+  device/          設備層，不依賴 React 或 store
+    deviceService.ts   DeviceService 介面、模擬專用的 SimulationTools、韌體安全驗證介面
+    types.ts           設備狀態型別
+    index.ts           唯一決定「使用哪一種設備」的地方
+    mock/              模擬設備、localStorage 儲存、跨分頁鎖
+    ble/               BLE UUID 與傳輸協議預留，禁止真實控制
+  stores/          Zustand：設備操作（deviceStore）、表單編輯（settingsStore）、同步狀態推導
+  hooks/           模擬時鐘、同步狀態、網址路由、離開前警告
+  components/      共用按鈕、輸入元件與雙眼模型
   pages/           五個繁體中文頁面
-  hooks/           模擬設備更新計時器
-  stores/          Zustand：設備狀態、編輯／已儲存設定
-  services/
-    deviceService.ts       設備通訊與韌體安全驗證介面
-    mockDeviceService.ts   本機模擬設備、持久化、動作引擎
-    bleDeviceService.ts    BLE UUID 與傳輸協議預留，禁止真實控制
-    schedule.ts            純函式排程判斷
-    device.test.ts         排程與設備行為測試
-  types/           設定介面、驗證函式與設備狀態
+  app/             外框（側邊欄、頂列、狀態列）與頁面清單
+  styles/          依載入順序拆成 base / shell / components / responsive
+  lib/ test/       時間格式化；測試共用工具
 ```
 
-不需要 React 經驗也能先從 `pages/` 的文字修改開始，儲存檔案後 Vite 會自動更新畫面。設備行為放在 service，頁面只負責呈現與呼叫，不要把 BLE 寫入動作放進按鈕元件。
+依賴方向固定為 `domain ← device ← stores ← hooks/components/pages/app`，反向引用會被 ESLint 擋下（規則在 `eslint.config.js`）。幾個維護時的原則：
+
+- **新增設定欄位**：改 `domain/settings.ts` 的型別與預設值 → `domain/validation.ts` 加驗證 → 頁面加輸入元件。範圍數值只寫在 `validation.ts`，頁面從那裡取用。
+- **新增頁面**：在 `app/pages.ts` 加一筆，側邊欄與路由會自動跟上。
+- **新增設備操作**：先加到 `DeviceService` 介面，再於 `deviceStore.ts` 加一個 action；頁面只呼叫 store 的 action，不直接碰設備。
+- **設定一律以新物件取代**，不要就地修改（`defaultSettings` 已凍結，誤改會直接報錯）。
+- 不需要 React 經驗也能先從 `pages/` 的文字修改開始，儲存檔案後 Vite 會自動更新畫面。
 
 ## 驗證與正式建置
 
 ```powershell
-npm test
+npm run check     # 格式、ESLint、型別檢查、測試，一次跑完；提交前請先執行
+npm test          # 只跑測試
+npm run test:coverage
+npm run format    # 以 Prettier 自動排版
 npm run build
 npm run preview
 ```
 
-`npm test` 驗證排程起迄、跨日／跨週、手動優先、完整循環、日間自動／停用、連線檢查、儲存失敗、資料驗證與重新啟動。`npm run build` 先檢查 TypeScript，再產生 `dist/`。`npm run preview` 可本機檢查正式版，依終端機網址開啟。不要直接雙擊 `dist/index.html`，須以 HTTP 伺服器提供。
+測試涵蓋排程起迄與跨日／跨週、眨眼時間軸、設定驗證、模擬設備（連線、儲存／套用、重新啟動、儲存失敗、資料損壞、改名、跨分頁互斥）、store 的操作流程與同步狀態，以及各頁面的渲染冒煙測試。`npm run build` 先檢查 TypeScript，再產生 `dist/`。`npm run preview` 可本機檢查正式版，依終端機網址開啟。不要直接雙擊 `dist/index.html`，須以 HTTP 伺服器提供。
 
 ## 第二階段如何整合 ESP32-WROOM-32
 
 1. 先完成機械限位、力量限制、故障釋放與醫療安全驗證；目前不得拿這個前端直接控制真人眼瞼。
 2. ESP32 韌體獨立實作排程管理器、左右伺服控制、設定驗證、時間同步、故障處理與 NVS 儲存。網頁關閉後仍由韌體自行執行，不依賴網頁計時器。
-3. 使用 `deviceService.ts` 的通訊介面實作真正 `BleDeviceService`，再把 store 的 mock 注入替換成 service 選擇器。`setSimulationTime`、`rename` 為目前 Mock 專用工具，不應誤送到實體設備。
+3. 依 `device/deviceService.ts` 的 `DeviceService` 介面實作 `device/ble/bleDeviceService.ts`，再修改 `device/index.ts` 的 `createDeviceBinding` 回傳它，並把 `simulation` 設為 `null`；store 與頁面不需要改。`setSimulationTime`、`rename`、`tick` 屬於 `SimulationTools`，實體設備不提供這個介面，因此不會被送到硬體，相關介面也會自動隱藏。目前通知文字仍寫「模擬設備」，接上實體設備時需一併調整 `deviceStore.ts` 的 `NOTICES` 與頁面上的說明文字。
 4. 使用 HTTPS 或 localhost，以及支援 Web Bluetooth 的瀏覽器。裝置選擇必須由使用者點擊觸發。目前沒有請求藍牙權限。
 5. BLE Service：`12345678-1234-1234-1234-123456789000`；設定 characteristic 尾碼 `9001`；狀態 characteristic 尾碼 `9002`（完整值見程式）。
 6. JSON 可能超過封包容量。需先共同定義協議版本、交易 ID、片序／總片數、長度、校驗、分段重組、ACK、逾時重試及去重，不能直接一次寫入整份 JSON。
 7. 「儲存成功」必須等待設備完成驗證、NVS 寫入並回覆 ACK；「套用成功」必須等待韌體更新排程管理器並回報。斷線與失敗不可假裝成功。
 8. 實作 `FirmwareSafetyGate`，角度限制與安全互鎖以韌體端為準，前端沒有繞過功能。讀取狀態通知，避免僅用前端推測實體位置。
 
-未完成：真實 BLE、分段傳輸、ESP32 韌體、NVS、真實位置回授、醫療／機械安全驗證、多分頁同步。上述均不包含在第一階段的模擬成果中。
+未完成：真實 BLE、分段傳輸、ESP32 韌體、NVS、真實位置回授、醫療／機械安全驗證。上述均不包含在第一階段的模擬成果中。
