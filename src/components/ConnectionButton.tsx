@@ -1,4 +1,5 @@
 import { Link, Unlink, type LucideIcon } from 'lucide-react';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { useDeviceStore } from '../stores';
 
 interface ConnectionButtonProps {
@@ -12,6 +13,7 @@ export function ConnectionButton({ icon, iconSize = 17 }: ConnectionButtonProps)
   const busy = useDeviceStore((state) => state.pending !== null);
   const connect = useDeviceStore((state) => state.connect);
   const disconnect = useDeviceStore((state) => state.disconnect);
+  const text = useDeviceText();
   const Icon = icon ?? (connected ? Unlink : Link);
 
   return (
@@ -22,7 +24,7 @@ export function ConnectionButton({ icon, iconSize = 17 }: ConnectionButtonProps)
       onClick={connected ? disconnect : connect}
     >
       <Icon size={iconSize} />
-      {connected ? '中斷連線' : '連接模擬設備'}
+      {connected ? '中斷連線' : text.connect}
     </button>
   );
 }

@@ -29,6 +29,7 @@
     "@tailwindcss/vite": "^4.1.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@types/web-bluetooth": "^0.0.22",
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^10.14.0",

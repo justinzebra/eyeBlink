@@ -37,15 +37,15 @@ export interface DeviceStoreDeps {
 }
 
 const NOTICES = {
-  connected: '已連接模擬設備',
-  disconnected: '已中斷模擬連線',
-  restarted: '模擬設備已重新啟動，並從持久化儲存區載入設定',
+  connected: '已連接設備',
+  disconnected: '已中斷連線',
+  restarted: '設備已重新載入儲存的設定，執行狀態已重設',
   read: '已讀取設備儲存設定，取代尚未儲存的編輯',
-  saved: '設定已寫入模擬設備儲存區，請按套用設定使其生效',
-  applied: '模擬設備已套用儲存設定',
+  saved: '設定已寫入設備儲存區，請按套用設定使其生效',
+  applied: '設備已套用儲存設定',
   manualNightOn: '手動夜間已開啟，模型保持閉眼；此為即時指令，不會被儲存',
   manualNightOff: '手動夜間已關閉，恢復依自動排程與日間設定運作',
-  blinkStarted: '模擬完整眨眼循環已開始，使用目前已套用的時間參數',
+  blinkStarted: '眨眼循環已開始，使用目前已套用的時間參數',
   renamed: '模擬設備名稱已儲存',
   clockUpdated: '模擬設備時鐘已更新',
 } as const;
@@ -73,7 +73,18 @@ export function createDeviceStore({ device, simulation, settings }: DeviceStoreD
       }
     };
 
-    const loadSavedSettings = async () => settings.getState().load(await device.readSettings());
+    /**
+     * 把設備已儲存的設定載入表單。讀不到時中斷連線：
+     * 否則表單會停在與設備不符的內容，使用者可能在沒看到實際設定的情況下按下套用。
+     */
+    const loadSavedSettings = async () => {
+      try {
+        settings.getState().load(await device.readSettings());
+      } catch (error) {
+        await device.disconnect().catch(() => undefined);
+        throw error;
+      }
+    };
 
     const requireSimulation = (): SimulationTools => {
       if (!simulation) throw new Error(SIMULATION_UNAVAILABLE);

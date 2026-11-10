@@ -1,8 +1,10 @@
 import { ChevronRight } from 'lucide-react';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { useDeviceStore } from '../stores';
 
 export function Topbar({ pageTitle }: { pageTitle: string }) {
   const connected = useDeviceStore((state) => state.status.connected);
+  const text = useDeviceText();
 
   return (
     <header className="topbar">
@@ -10,10 +12,10 @@ export function Topbar({ pageTitle }: { pageTitle: string }) {
         設備工作台 <ChevronRight size={14} /> <strong>{pageTitle}</strong>
       </div>
       <div>
-        <span className="tag">模擬模式</span>
+        <span className="tag">{text.modeTag}</span>
         <span className={connected ? 'connection connected' : 'connection'}>
           <i />
-          {connected ? '模擬設備已連線' : '設備未連線'}
+          {connected ? text.connected : '設備未連線'}
         </span>
       </div>
     </header>

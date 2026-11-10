@@ -71,7 +71,8 @@ function validateNightMode(night: unknown): string[] {
 function isValidCloseAngle(angle: unknown): boolean {
   if (angle === null) return true;
   const { min, max } = CLOSE_ANGLE_LIMITS;
-  return typeof angle === 'number' && Number.isFinite(angle) && angle >= min && angle <= max;
+  // 限整數：實體設備以整數度數儲存角度，模擬設備採用相同規則以免行為不一致。
+  return typeof angle === 'number' && Number.isInteger(angle) && angle >= min && angle <= max;
 }
 
 function validateMotor(motor: unknown): string[] {
@@ -85,7 +86,7 @@ function validateMotor(motor: unknown): string[] {
         isValidCloseAngle(sideSettings.closeAngle)
       );
     });
-  return isValid ? [] : ['模型睜眼角度須為 0°，閉眼展示角度須為 0–90° 或未設定'];
+  return isValid ? [] : ['模型睜眼角度須為 0°，閉眼角度須為 0–90° 的整數或未設定'];
 }
 
 /** 回傳所有錯誤訊息；空陣列代表設定有效。可用於任何不受信任的輸入。 */

@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { useSettingsSync } from '../hooks/useSettingsSync';
 import { useDeviceStore } from '../stores';
 import type { SyncState } from '../stores/syncState';
@@ -21,6 +22,7 @@ export function StatusBanner() {
   const notice = useDeviceStore((state) => state.notice);
   const { syncState, errors } = useSettingsSync();
   const message = error || notice;
+  const text = useDeviceText();
 
   return (
     <>
@@ -29,8 +31,14 @@ export function StatusBanner() {
           <i className={NEEDS_ATTENTION.includes(syncState) ? 'dot amber' : 'dot'} />
           {SYNC_LABELS[syncState]}
         </span>
-        <span>所有動作僅在桌面模型中模擬</span>
+        <span>{text.scopeNote}</span>
       </div>
+      {text.warning && (
+        <div className="notice error" role="note">
+          <AlertCircle size={18} />
+          <span>{text.warning}</span>
+        </div>
+      )}
       <div aria-live="polite">
         {message && (
           <div className={error ? 'notice error' : 'notice'}>

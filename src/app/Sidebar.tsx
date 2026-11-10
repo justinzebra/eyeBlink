@@ -1,4 +1,5 @@
 import { ChevronRight, Eye, ShieldCheck } from 'lucide-react';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { PAGES } from './pages';
 
 interface SidebarProps {
@@ -7,6 +8,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activePageId, onNavigate }: SidebarProps) {
+  const text = useDeviceText();
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -41,13 +44,9 @@ export function Sidebar({ activePageId, onNavigate }: SidebarProps) {
         <div className="safe-icon">
           <ShieldCheck size={22} />
         </div>
-        <strong>安心從模擬開始</strong>
-        <p>
-          目前僅供軟體模型測試，
-          <br />
-          不會輸出實體馬達訊號。
-        </p>
-        <span className="tag teal">第一階段 · 模擬模式</span>
+        <strong>{text.sidebarTitle}</strong>
+        <p>{text.sidebarNote}</p>
+        <span className="tag teal">{text.sidebarTag}</span>
       </div>
       <div className="sidebar-footer">眨眼輔助控制系統 · 版本 1.0</div>
     </aside>

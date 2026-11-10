@@ -113,7 +113,7 @@ function BlinkCycle() {
           onClick={simulateBlink}
         >
           <Play size={17} />
-          模擬執行
+          執行一次眨眼
         </button>
         <DeviceActions />
       </div>
@@ -128,7 +128,7 @@ export function DayMode() {
         <BlinkParameters />
         <div>
           <EyeModel />
-          <div className="info-box">模擬執行使用「已套用」參數；修改後請依序儲存、套用。</div>
+          <div className="info-box">眨眼使用「已套用」參數；修改後請依序儲存、套用。</div>
         </div>
       </div>
       <BlinkCycle />

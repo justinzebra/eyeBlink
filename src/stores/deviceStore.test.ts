@@ -52,7 +52,7 @@ describe('deviceStore', () => {
     await store.getState().connect();
 
     expect(store.getState().status.connected).toBe(true);
-    expect(store.getState().notice).toBe('已連接模擬設備');
+    expect(store.getState().notice).toBe('已連接設備');
     expect(syncState()).toBe('applied');
   });
 
@@ -139,6 +139,16 @@ describe('deviceStore', () => {
     expect(store.getState().status.source).toBe('day');
   });
 
+  it('連線後讀不到設備設定時中斷連線，不留下與設備不符的表單', async () => {
+    const { store, device } = setup();
+    vi.spyOn(device, 'readSettings').mockRejectedValueOnce(new Error('設備回傳的設定無效'));
+
+    await store.getState().connect();
+
+    expect(store.getState().error).toContain('設定無效');
+    expect(store.getState().status.connected).toBe(false);
+  });
+
   it('未連線時操作失敗並顯示錯誤，不殘留進行中狀態', async () => {
     const { store } = setup();
 
@@ -155,7 +165,7 @@ describe('deviceStore', () => {
     await store.getState().disconnect();
 
     expect(syncState()).toBe('disconnected');
-    expect(store.getState().notice).toBe('已中斷模擬連線');
+    expect(store.getState().notice).toBe('已中斷連線');
   });
 
   it('模擬工具：改名與模擬時鐘', async () => {

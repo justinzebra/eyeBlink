@@ -2,6 +2,7 @@ import { Copy, RotateCcw } from 'lucide-react';
 import { DeviceActions } from '../components/DeviceActions';
 import { MOTOR_SIDES, createUnsetMotor, type MotorSide } from '../domain/settings';
 import { CLOSE_ANGLE_LIMITS } from '../domain/validation';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { useSettingsStore } from '../stores';
 
 const SIDE_LABELS: Record<MotorSide, string> = { left: '左側', right: '右側' };
@@ -54,12 +55,11 @@ function MotorSideCard({ side }: { side: MotorSide }) {
 export function MotorSettings() {
   const motor = useSettingsStore((state) => state.draft.motor);
   const setMotor = useSettingsStore((state) => state.setMotor);
+  const text = useDeviceText();
 
   return (
     <>
-      <div className="info-box">
-        角度僅供桌面模型展示與模擬。0–90° 是軟體展示範圍，並非人體安全範圍，也不代表已完成機械校正。
-      </div>
+      <div className="info-box">{text.angleNote}</div>
       <div className="two-col">
         {MOTOR_SIDES.map((side) => (
           <MotorSideCard key={side} side={side} />
@@ -82,9 +82,7 @@ export function MotorSettings() {
         </div>
         <DeviceActions />
       </section>
-      <p className="caption">
-        韌體安全驗證接口已預留。真實控制仍需機械限位、力量限制、故障釋放與醫療安全驗證。
-      </p>
+      <p className="caption">用於人體前仍需完成機械限位、力量限制、故障釋放與醫療安全驗證。</p>
     </>
   );
 }

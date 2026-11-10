@@ -2,6 +2,7 @@ import { CalendarClock, Moon, Play, RefreshCw, Sun } from 'lucide-react';
 import { DeviceActions } from '../components/DeviceActions';
 import { EyeModel } from '../components/EyeModel';
 import type { DeviceMode, ModeSource } from '../device/types';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { formatTime } from '../lib/formatTime';
 import { useDeviceStore } from '../stores';
 
@@ -69,12 +70,13 @@ function DeviceInfo() {
   const status = useDeviceStore((state) => state.status);
   const busy = useDeviceStore((state) => state.pending !== null);
   const simulateBlink = useDeviceStore((state) => state.simulateBlink);
+  const text = useDeviceText();
 
   return (
     <section className="card">
       <div className="section-head">
         <h2>設備資訊</h2>
-        <span className="tag">模擬模式</span>
+        <span className="tag">{text.modeTag}</span>
       </div>
       <dl>
         <div>
@@ -84,7 +86,7 @@ function DeviceInfo() {
         <div>
           <dt>連線狀態</dt>
           <dd className={status.connected ? 'success' : ''}>
-            {status.connected ? '模擬設備已連線' : '設備未連線'}
+            {status.connected ? text.connected : '設備未連線'}
           </dd>
         </div>
         <div>
@@ -107,7 +109,7 @@ function DeviceInfo() {
         onClick={simulateBlink}
       >
         <Play size={17} />
-        模擬執行一次眨眼
+        {text.blinkOnce}
       </button>
     </section>
   );

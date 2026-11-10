@@ -1,5 +1,6 @@
 import type { BlinkPhase } from '../domain/blinkTimeline';
 import { MOTOR_SIDES, type MotorSide } from '../domain/settings';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { useDeviceStore } from '../stores';
 
 const PHASE_LABELS: Record<BlinkPhase, string> = {
@@ -57,10 +58,11 @@ function Eye({ side, progress, angle, hasReferenceAngle }: EyeProps) {
   );
 }
 
-/** 即時顯示模擬設備的雙眼姿態。 */
+/** 即時顯示設備的雙眼姿態（模擬設備為計算值，實體設備為韌體回報值）。 */
 export function EyeModel() {
   const status = useDeviceStore((state) => state.status);
   const motor = useDeviceStore((state) => state.active.motor);
+  const text = useDeviceText();
   const angles: Record<MotorSide, number | null> = {
     left: status.leftAngle,
     right: status.rightAngle,
@@ -70,7 +72,7 @@ export function EyeModel() {
     <section className="card model-card">
       <div className="section-head">
         <h2>即時模型</h2>
-        <span className="tag teal">純軟體模擬</span>
+        <span className="tag teal">{text.modelTag}</span>
       </div>
       <div className="eyes" aria-label={'模型狀態：' + PHASE_LABELS[status.phase]}>
         {MOTOR_SIDES.map((side) => (
@@ -86,7 +88,7 @@ export function EyeModel() {
       <div className="model-phase">
         <span className="pulse" />
         {PHASE_LABELS[status.phase]}
-        <span>{status.mode === 'night' ? '持續閉眼模擬' : '睜眼 → 閉眼 → 停留 → 睜眼'}</span>
+        <span>{status.mode === 'night' ? '持續閉眼' : '睜眼 → 閉眼 → 停留 → 睜眼'}</span>
       </div>
       <p className="caption">未設定角度時，眼形僅示意動作進度。此模型不代表人體安全範圍。</p>
     </section>

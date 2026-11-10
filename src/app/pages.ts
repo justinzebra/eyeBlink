@@ -55,7 +55,7 @@ export const PAGES: readonly PageDefinition[] = [
   {
     id: 'device',
     title: '設備設定',
-    subtitle: '管理模擬連線、儲存與設備資訊',
+    subtitle: '選擇設備類型，管理連線、儲存與設備資訊',
     icon: Bluetooth,
     component: DeviceSettings,
   },

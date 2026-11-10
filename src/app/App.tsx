@@ -1,5 +1,6 @@
 import { Bluetooth, ShieldCheck } from 'lucide-react';
 import { ConnectionButton } from '../components/ConnectionButton';
+import { useDeviceText } from '../hooks/useDeviceText';
 import { useDeviceClock } from '../hooks/useDeviceClock';
 import { useHashRoute } from '../hooks/useHashRoute';
 import { useSettingsSync } from '../hooks/useSettingsSync';
@@ -16,6 +17,7 @@ export default function App() {
   const { isDirty } = useSettingsSync();
   useUnsavedWarning(isDirty);
   const busy = useDeviceStore((state) => state.pending !== null);
+  const text = useDeviceText();
   const page = findPage(route);
   const Page = page.component;
 
@@ -39,7 +41,7 @@ export default function App() {
             <Page />
           </fieldset>
           <footer className="main-footer">
-            <ShieldCheck size={15} /> 僅供桌面模型展示與模擬，尚未通過醫療安全驗證。
+            <ShieldCheck size={15} /> {text.footer}
           </footer>
         </main>
       </div>

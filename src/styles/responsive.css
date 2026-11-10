@@ -229,4 +229,7 @@
   .section-head h2 {
     font-size: 16px;
   }
+  .kind-options {
+    grid-template-columns: 1fr;
+  }
 }

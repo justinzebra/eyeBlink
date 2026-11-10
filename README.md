@@ -1,6 +1,11 @@
 # Blink Assist — 眨眼輔助控制系統
 
-第一階段為可執行的 React 前端與本機模擬設備。**沒有真實 BLE 連線，也不會輸出任何馬達訊號。** 不可用來驅動真人眼瞼，長時間閉眼模擬不代表醫療安全已獲驗證。
+React 前端控制介面，加上 ESP32 韌體。前端可以在兩種設備之間切換：
+
+- **模擬設備**（預設）：完全在瀏覽器裡執行，不需要硬體，不會有任何馬達轉動。
+- **ESP32 實機**：透過藍牙控制已燒錄韌體的 ESP32-WROOM-32，驅動 MG90S 伺服馬達。接線與燒錄見 [`firmware/README.md`](firmware/README.md)。
+
+**實機模式僅供桌面模型測試。** 尚未完成機械限位、力量限制、故障釋放與醫療安全驗證，不可用來驅動真人眼瞼。韌體目前只確認能編譯，尚未在實體硬體上驗證。
 
 ## 第一次使用（Windows）
 
@@ -55,7 +60,8 @@ npm run dev
 
 ### 設備設定
 
-- 「搜尋模擬設備」只列出本機服務，沒有呼叫真實藍牙。可以連接、中斷、讀取、儲存及套用。
+- 最上方的「設備類型」可在模擬設備與 ESP32 實機之間切換；切換後頁面會重新載入，選擇會被記住。以下步驟以模擬設備為例。
+- 可以連接、中斷、讀取、儲存及套用。
 - 修改設備名稱並按「儲存設備名稱」，名稱獨立持久化。
 - 修改時間參數後先儲存、不套用，再按「模擬設備重新啟動」：應載入剛儲存的設定並執行。
 - 修改但不儲存，再重新啟動：應恢復最後儲存版本。
@@ -90,16 +96,22 @@ src/
   device/          設備層，不依賴 React 或 store
     deviceService.ts   DeviceService 介面、模擬專用的 SimulationTools、韌體安全驗證介面
     types.ts           設備狀態型別
-    index.ts           唯一決定「使用哪一種設備」的地方
+    deviceKind.ts      記住使用者選擇的設備類型
+    index.ts           依設備類型建立對應的實作
     mock/              模擬設備、localStorage 儲存、跨分頁鎖
-    ble/               BLE UUID 與傳輸協議預留，禁止真實控制
+    ble/               Web Bluetooth 實作與協議編解碼
   stores/          Zustand：設備操作（deviceStore）、表單編輯（settingsStore）、同步狀態推導
   hooks/           模擬時鐘、同步狀態、網址路由、離開前警告
   components/      共用按鈕、輸入元件與雙眼模型
   pages/           五個繁體中文頁面
   app/             外框（側邊欄、頂列、狀態列）與頁面清單
   styles/          依載入順序拆成 base / shell / components / responsive
-  lib/ test/       時間格式化；測試共用工具
+  lib/ test/       時間格式化、依設備類型變化的介面文字；測試共用工具
+firmware/
+  BlinkAssist/     ESP32 韌體（Arduino IDE 專案）
+  README.md        接線、燒錄與故障排除
+docs/
+  ble-protocol.md  前端與韌體之間的藍牙通訊協議
 ```
 
 依賴方向固定為 `domain ← device ← stores ← hooks/components/pages/app`，反向引用會被 ESLint 擋下（規則在 `eslint.config.js`）。幾個維護時的原則：
@@ -123,15 +135,33 @@ npm run preview
 
 測試涵蓋排程起迄與跨日／跨週、眨眼時間軸、設定驗證、模擬設備（連線、儲存／套用、重新啟動、儲存失敗、資料損壞、改名、跨分頁互斥）、store 的操作流程與同步狀態，以及各頁面的渲染冒煙測試。`npm run build` 先檢查 TypeScript，再產生 `dist/`。`npm run preview` 可本機檢查正式版，依終端機網址開啟。不要直接雙擊 `dist/index.html`，須以 HTTP 伺服器提供。
 
-## 第二階段如何整合 ESP32-WROOM-32
+## 使用 ESP32 實機
 
-1. 先完成機械限位、力量限制、故障釋放與醫療安全驗證；目前不得拿這個前端直接控制真人眼瞼。
-2. ESP32 韌體獨立實作排程管理器、左右伺服控制、設定驗證、時間同步、故障處理與 NVS 儲存。網頁關閉後仍由韌體自行執行，不依賴網頁計時器。
-3. 依 `device/deviceService.ts` 的 `DeviceService` 介面實作 `device/ble/bleDeviceService.ts`，再修改 `device/index.ts` 的 `createDeviceBinding` 回傳它，並把 `simulation` 設為 `null`；store 與頁面不需要改。`setSimulationTime`、`rename`、`tick` 屬於 `SimulationTools`，實體設備不提供這個介面，因此不會被送到硬體，相關介面也會自動隱藏。目前通知文字仍寫「模擬設備」，接上實體設備時需一併調整 `deviceStore.ts` 的 `NOTICES` 與頁面上的說明文字。
-4. 使用 HTTPS 或 localhost，以及支援 Web Bluetooth 的瀏覽器。裝置選擇必須由使用者點擊觸發。目前沒有請求藍牙權限。
-5. BLE Service：`12345678-1234-1234-1234-123456789000`；設定 characteristic 尾碼 `9001`；狀態 characteristic 尾碼 `9002`（完整值見程式）。
-6. JSON 可能超過封包容量。需先共同定義協議版本、交易 ID、片序／總片數、長度、校驗、分段重組、ACK、逾時重試及去重，不能直接一次寫入整份 JSON。
-7. 「儲存成功」必須等待設備完成驗證、NVS 寫入並回覆 ACK；「套用成功」必須等待韌體更新排程管理器並回報。斷線與失敗不可假裝成功。
-8. 實作 `FirmwareSafetyGate`，角度限制與安全互鎖以韌體端為準，前端沒有繞過功能。讀取狀態通知，避免僅用前端推測實體位置。
+1. 依 [`firmware/README.md`](firmware/README.md) 接線，並用 Arduino IDE 把 `firmware/BlinkAssist` 燒錄到 ESP32-WROOM-32。
+2. 啟動前端，用電腦版 Chrome 或 Edge 開啟（Web Bluetooth 需要 localhost 或 HTTPS）。
+3. 到「設備設定」把設備類型切換成「ESP32 實機（藍牙）」。
+4. 按「連接 ESP32 設備」，在瀏覽器視窗選擇 **BlinkAssist**。
+5. 到「馬達設定」從小角度開始設定，儲存並套用後，再到「日間模式」按「執行一次眨眼」。
 
-未完成：真實 BLE、分段傳輸、ESP32 韌體、NVS、真實位置回授、醫療／機械安全驗證。上述均不包含在第一階段的模擬成果中。
+實機模式與模擬模式的差異：
+
+| 項目           | 模擬設備                   | ESP32 實機                                                    |
+| -------------- | -------------------------- | ------------------------------------------------------------- |
+| 設定儲存位置   | 瀏覽器 localStorage        | ESP32 的 NVS，斷電保留                                        |
+| 網頁關閉後     | 停止                       | 設備依已套用的設定繼續運作                                    |
+| 時鐘           | 電腦時間，可用模擬工具調整 | 每次連線時由前端對時；斷電重開後需重新連線，排程才會恢復      |
+| 角度上限       | 0–90°（展示用）            | 由韌體 `config.h` 的 `MAX_CLOSE_ANGLE_DEG` 決定，超過會被拒絕 |
+| 改名、模擬時鐘 | 有                         | 沒有（介面會自動隱藏）                                        |
+| 畫面上的眼睛   | 前端計算                   | 韌體回報的狀態                                                |
+
+「儲存成功」「套用成功」都必須等設備回覆確認才會顯示；設備 5 秒內沒有回應或中途斷線，一律顯示失敗。通訊協議的完整定義在 [`docs/ble-protocol.md`](docs/ble-protocol.md)。
+
+## 尚未完成
+
+- 韌體尚未在實體 ESP32 與 MG90S 上驗證，只確認能以 Arduino-ESP32 3.3.12 編譯。
+- 藍牙沒有配對或加密，範圍內任何人都能連線下指令。
+- 沒有位置回授，畫面顯示的是韌體送出的角度，不是馬達實際到達的角度。
+- 沒有實體緊急停止、故障釋放機制，也沒有機械限位與力量限制。
+- 醫療與機械安全驗證。
+
+以上完成之前，本系統只能用在桌面模型上。
