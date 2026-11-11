@@ -97,6 +97,23 @@ Espressif 的 ESP32 Series Datasheet 在 Clocks and Timers 中明列 Wi-Fi／Blu
 
 若使用者選擇 USB 通訊，需要新增 Web Serial 前端與韌體序列協議，仍維持設備回覆後才宣稱成功，以及設備端獨立排程。還需量測這塊板子的計時與 PWM 是否準確，不能直接沿用目前 SDK 對 40 MHz 的假設。USB 方案目前只有討論，尚未開發。
 
+## 2026-11-12 後續：26 MHz 的軟體修正（已寫入，尚未上板驗證）
+
+上文「沒有純軟體修復方法」的判斷後來查證為過於悲觀，更正如下。
+
+- 這是 Arduino-ESP32 3.x 的已知問題（[arduino-esp32 #9837](https://github.com/espressif/arduino-esp32/issues/9837)）：2.0.x 會自動偵測晶振，3.0 起固定為 40 MHz。SparkFun ESP32 Thing、Heltec LoRa、TTGO LoRa32 等 26 MHz 的板子都出現相同症狀（74,880 baud、計時慢 1.54 倍）。
+- ESP-IDF 5.5 的主晶振選項明列 26 MHz，所以 26 MHz 本身是受支援的組態，不能據此判定板子是瑕疵品。
+- 核心的 `main.cpp` 在定義 `F_XTAL_MHZ` 時會呼叫 `rtc_clk_xtal_freq_update()` 與 `rtc_clk_cpu_freq_set_xtal()` 更正時脈。本專案在 `BlinkAssist.ino` 的 `setup()` 開頭做同樣的事，由 `config.h` 的 `MAIN_XTAL_MHZ` 控制（`0` 為不更正，目前設為 `26`）。沒有採用 `build_opt.h`，因為 Arduino IDE 可能沿用快取的核心而讓旗標靜靜失效。
+- 藍牙控制器在執行時以 `esp_clk_xtal_freq()` 取得晶振頻率；無線電校正的函式庫不公開，無法從原始碼確認。issue 中有人回報序列埠與計時恢復正常，但沒有人明確回報藍牙恢復。
+
+**這項修改是在沒有板子、也沒有 Arduino 工具的電腦上寫的，沒有編譯過，也沒有上板。** 驗證順序：
+
+1. 上傳後序列埠以 115,200 baud 能讀懂，代表時脈已更正。開機最前面幾行（開機載入程式的輸出）仍可能是亂碼，屬正常。
+2. 以前端或手機的 BLE 掃描工具確認是否出現 `BlinkAssist`。
+3. 上述兩項都通過之前不要接馬達。時脈未更正時伺服脈波約為應有的 1.54 倍長。
+
+若時脈恢復但藍牙仍掃不到，下一個備案是把 ESP32 套件降到 2.0.17（韌體保留了 2.x 的寫法但未編譯過），再來才是換板子或改走 USB。
+
 ## 操作限制與暫存證據
 
 遵守根目錄 AGENTS.md 的所有安全限制。實機只供桌面模型，尚未完成機械限位、力量限制、故障釋放與醫療安全驗證。調查期間沒有進行馬達動作驗證。除非使用者另有要求，不要 commit 或 push。

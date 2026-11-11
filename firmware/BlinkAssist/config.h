@@ -13,6 +13,17 @@ constexpr char DEVICE_NAME[] = "BlinkAssist";
 constexpr uint8_t FIRMWARE_VERSION_MAJOR = 1;
 constexpr uint8_t FIRMWARE_VERSION_MINOR = 0;
 
+// ---- 主晶振頻率（MHz）----
+// Arduino-ESP32 3.x 一律假設主晶振是 40 MHz。少數開發板用的是 26 MHz，
+// 不更正的話所有時脈都只有應有的 65%：序列埠要用 74880 才讀得懂、計時變慢、
+// 伺服脈波變長，藍牙也掃不到。
+//   0  = 不更正（一般 40 MHz 的板子用這個）
+//   26 = 開機時更正為 26 MHz
+// 必須與板子實際的晶振相符，填錯會讓時脈與伺服脈波全部走樣。
+// 判斷方式：燒錄時 esptool 會印出「Crystal is 26MHz」或「Crystal is 40MHz」。
+// 目前設為 26 是因為使用者手上這塊板子是 26 MHz；換成 40 MHz 的板子時務必改回 0。
+constexpr uint8_t MAIN_XTAL_MHZ = 26;
+
 // ---- 伺服馬達接腳（訊號線，MG90S 的橘色線）----
 // 避免使用 GPIO 0/2/5/12/15（開機模式腳位）與 6–11（接內部 Flash）。
 constexpr uint8_t LEFT_SERVO_PIN = 18;

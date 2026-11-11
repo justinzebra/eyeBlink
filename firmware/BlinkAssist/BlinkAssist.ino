@@ -20,6 +20,8 @@
 #include <Arduino.h>
 #include <string.h>
 
+#include "soc/rtc.h"
+
 #include "ble_link.h"
 #include "blink_engine.h"
 #include "config.h"
@@ -219,7 +221,22 @@ void reportStatus() {
 
 }  // namespace
 
+// 板子的主晶振不是 40 MHz 時，把時脈更正為實際頻率。
+// 做法與 Arduino 核心對 F_XTAL_MHZ 的處理相同：更新晶振頻率、暫時切到晶振時脈，
+// 再重新鎖定 PLL 回到原本的 CPU 頻率。
+static void correctMainXtal() {
+  if (config::MAIN_XTAL_MHZ == 0) {
+    return;
+  }
+  rtc_clk_xtal_freq_update((rtc_xtal_freq_t)config::MAIN_XTAL_MHZ);
+  rtc_clk_cpu_freq_set_xtal();
+  setCpuFrequencyMhz(F_CPU / 1000000);
+}
+
 void setup() {
+  // 一定要最先做：伺服 PWM、計時與藍牙都依賴正確的時脈。
+  correctMainXtal();
+
   // 先把馬達移到睜眼位置，再做其他初始化。
   servos.begin();
   deviceClock.tick(millis());
