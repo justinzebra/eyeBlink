@@ -9,6 +9,12 @@ React 前端控制介面，加上 ESP32 韌體。前端可以在兩種設備之�
 
 ## 第一次使用（Windows）
 
+如果已安裝 Node.js，直接雙擊專案資料夾內的 [啟動前端.cmd](啟動前端.cmd)。缺少前端套件時會自動安裝，成功啟動後會用預設瀏覽器開啟 [Blink Assist](http://127.0.0.1:5173/)。使用實機藍牙時，請用 Chrome 或 Edge。
+
+使用期間請保留啟動視窗，關閉啟動視窗即可停止前端。再雙擊一次時，如果前端已在執行，就會直接開啟同一個網址。
+
+尚未安裝 Node.js，或想手動啟動時，可依下列步驟操作。
+
 1. 到 [Node.js 官方網站](https://nodejs.org/zh-tw) 下載 LTS 安裝程式。依畫面安裝，保留 npm 與加入 PATH 的預設選項。**需要 Node.js 20.19 以上**（建議 22 或 24 LTS）；較舊的版本無法執行本專案使用的 Vite 7。
 2. 安裝後重新開啟 PowerShell，輸入 `node --version` 與 `npm --version`，確認版本符合上述要求。若使用 nvm-windows，可執行 `nvm install 22` 再 `nvm use 22`。
 3. 在 PowerShell 依序輸入（不用輸入程式碼框的反引號）：
