@@ -58,7 +58,7 @@ export const defaultSettings: BlinkSettings = deepFreeze({
   version: SETTINGS_VERSION,
   dayMode: {
     enabled: true,
-    intervalMs: 600_000,
+    intervalMs: 5_000,
     closeDurationMs: 500,
     closedHoldMs: 300,
     openDurationMs: 500,

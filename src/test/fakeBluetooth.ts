@@ -46,7 +46,7 @@ export function statusBytes({
   leftAngle = 0xff,
   rightAngle = 0xff,
   localEpochSeconds = 1_800_000_000,
-  msUntilNextBlink = 600_000,
+  msUntilNextBlink = 5_000,
 }: FakeStatusOptions = {}): Uint8Array {
   const bytes = new Uint8Array(16);
   const view = new DataView(bytes.buffer);

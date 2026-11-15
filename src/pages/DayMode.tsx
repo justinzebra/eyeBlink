@@ -7,11 +7,14 @@ import { blinkDurationMs, type DayModeSettings } from '../domain/settings';
 import { DAY_LIMITS } from '../domain/validation';
 import { useDeviceStore, useSettingsStore } from '../stores';
 
-const MS_PER_MINUTE = 60_000;
 const MS_PER_SECOND = 1000;
 const DURATION_STEP_MS = 50;
-/** 介面以分鐘為單位輸入間隔，最小一分鐘。 */
-const INTERVAL_MINUTES = { min: 1, max: DAY_LIMITS.intervalMs.max / MS_PER_MINUTE };
+const INTERVAL_STEP_SECONDS = 0.5;
+/** 介面以秒為單位輸入間隔；範圍取自 domain，不在這裡另寫數字。 */
+const INTERVAL_SECONDS = {
+  min: DAY_LIMITS.intervalMs.min / MS_PER_SECOND,
+  max: DAY_LIMITS.intervalMs.max / MS_PER_SECOND,
+};
 
 function BlinkParameters() {
   const day = useSettingsStore((state) => state.draft.dayMode);
@@ -30,10 +33,11 @@ function BlinkParameters() {
       <div className="field-grid">
         <NumberField
           label="眨眼間隔"
-          unit="分鐘"
-          value={day.intervalMs / MS_PER_MINUTE}
-          {...INTERVAL_MINUTES}
-          onChange={(minutes) => patchDayMode({ intervalMs: Math.round(minutes * MS_PER_MINUTE) })}
+          unit="秒"
+          value={day.intervalMs / MS_PER_SECOND}
+          {...INTERVAL_SECONDS}
+          step={INTERVAL_STEP_SECONDS}
+          onChange={(seconds) => patchDayMode({ intervalMs: Math.round(seconds * MS_PER_SECOND) })}
           help="本次開始至下次開始的間隔"
         />
         <NumberField

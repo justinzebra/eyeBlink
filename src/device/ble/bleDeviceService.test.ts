@@ -139,12 +139,12 @@ describe('BleDeviceService', () => {
       esp32.setSaved(
         encodeSettings(
           withSettings((s) => {
-            s.dayMode.intervalMs = 120_000;
+            s.dayMode.intervalMs = 8_000;
           }),
         ),
       );
 
-      expect((await service.readSettings()).dayMode.intervalMs).toBe(120_000);
+      expect((await service.readSettings()).dayMode.intervalMs).toBe(8_000);
     });
 
     it('儲存時送出編碼後的設定，設備確認後才算成功', async () => {
@@ -194,7 +194,7 @@ describe('BleDeviceService', () => {
       esp32.setActive(
         encodeSettings(
           withSettings((s) => {
-            s.dayMode.intervalMs = 120_000;
+            s.dayMode.intervalMs = 8_000;
           }),
         ),
       );
@@ -202,7 +202,7 @@ describe('BleDeviceService', () => {
       await service.applySettings();
 
       expect(esp32.commands.at(-1)?.opcode).toBe(Opcode.applySettings);
-      expect(service.snapshot().active.dayMode.intervalMs).toBe(120_000);
+      expect(service.snapshot().active.dayMode.intervalMs).toBe(8_000);
     });
 
     it('設備回傳無效設定時不採用', async () => {
@@ -302,10 +302,10 @@ describe('BleDeviceService', () => {
       await service.connect();
       const first = service.snapshot().status.nextBlink;
 
-      esp32.notifyStatus({ msUntilNextBlink: 600_400 });
+      esp32.notifyStatus({ msUntilNextBlink: 5_400 });
       expect(service.snapshot().status.nextBlink).toBe(first);
 
-      esp32.notifyStatus({ msUntilNextBlink: 120_000 });
+      esp32.notifyStatus({ msUntilNextBlink: 8_000 });
       expect(service.snapshot().status.nextBlink).not.toBe(first);
     });
 

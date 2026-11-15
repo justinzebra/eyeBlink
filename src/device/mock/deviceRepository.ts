@@ -2,7 +2,8 @@ import { cloneSettings, type BlinkSettings } from '../../domain/settings';
 import { isValidSettings, validateSettings } from '../../domain/validation';
 import { DEFAULT_DEVICE_NAME, normalizeDeviceName } from '../deviceName';
 
-export const STORAGE_KEY = 'blink-assist.mock-device.v1';
+// v2：眨眼間隔範圍改為 1–10 秒。舊鍵（v1）裡的資料可能超出新範圍，換鍵後不再讀取。
+export const STORAGE_KEY = 'blink-assist.mock-device.v2';
 
 export interface PersistedDevice {
   settings: BlinkSettings;

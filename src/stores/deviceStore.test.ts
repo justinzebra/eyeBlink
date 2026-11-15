@@ -60,22 +60,22 @@ describe('deviceStore', () => {
     const { store, settings, syncState, save } = setup();
     await store.getState().connect();
 
-    settings.getState().patchDayMode({ intervalMs: 120_000 });
+    settings.getState().patchDayMode({ intervalMs: 8_000 });
     expect(syncState()).toBe('unsaved');
 
     await save();
     expect(syncState()).toBe('unapplied');
-    expect(store.getState().active.dayMode.intervalMs).toBe(600_000);
+    expect(store.getState().active.dayMode.intervalMs).toBe(5_000);
 
     await store.getState().applySettings();
     expect(syncState()).toBe('applied');
-    expect(store.getState().active.dayMode.intervalMs).toBe(120_000);
+    expect(store.getState().active.dayMode.intervalMs).toBe(8_000);
   });
 
   it('儲存進行中顯示儲存中，並忽略同時送出的其他操作', async () => {
     const { store, settings, syncState } = setup();
     await store.getState().connect();
-    settings.getState().patchDayMode({ intervalMs: 120_000 });
+    settings.getState().patchDayMode({ intervalMs: 8_000 });
 
     const pending = store.getState().saveSettings();
     expect(syncState()).toBe('saving');
@@ -90,18 +90,18 @@ describe('deviceStore', () => {
   it('有未儲存修改時拒絕套用', async () => {
     const { store, settings } = setup();
     await store.getState().connect();
-    settings.getState().patchDayMode({ intervalMs: 120_000 });
+    settings.getState().patchDayMode({ intervalMs: 8_000 });
 
     await store.getState().applySettings();
 
     expect(store.getState().error).toBe('請先儲存目前修改，再套用設定');
-    expect(store.getState().active.dayMode.intervalMs).toBe(600_000);
+    expect(store.getState().active.dayMode.intervalMs).toBe(5_000);
   });
 
   it('儲存失敗時顯示錯誤，draft 保留且仍為尚未儲存', async () => {
     const { store, settings, storage, syncState, save } = setup();
     await store.getState().connect();
-    settings.getState().patchDayMode({ intervalMs: 120_000 });
+    settings.getState().patchDayMode({ intervalMs: 8_000 });
     vi.spyOn(storage, 'setItem').mockImplementation(() => {
       throw new Error('quota');
     });
@@ -110,18 +110,18 @@ describe('deviceStore', () => {
 
     expect(store.getState().error).toContain('模擬儲存失敗');
     expect(store.getState().notice).toBe('');
-    expect(settings.getState().draft.dayMode.intervalMs).toBe(120_000);
+    expect(settings.getState().draft.dayMode.intervalMs).toBe(8_000);
     expect(syncState()).toBe('unsaved');
   });
 
   it('讀取設定會取代未儲存的編輯', async () => {
     const { store, settings } = setup();
     await store.getState().connect();
-    settings.getState().patchDayMode({ intervalMs: 120_000 });
+    settings.getState().patchDayMode({ intervalMs: 8_000 });
 
     await store.getState().readSettings();
 
-    expect(settings.getState().draft.dayMode.intervalMs).toBe(600_000);
+    expect(settings.getState().draft.dayMode.intervalMs).toBe(5_000);
   });
 
   it('手動夜間立即生效且不影響設定同步狀態，重新啟動後回到關閉', async () => {

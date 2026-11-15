@@ -73,7 +73,7 @@ domain  ←  device  ←  stores  ←  hooks / components / pages / app
 **設定有三份。**
 
 - `draft`：表單編輯中（`settingsStore`）。
-- `saved`：設備儲存區的內容（`settingsStore` 保留一份副本；模擬設備寫入 `localStorage`，鍵為 `blink-assist.mock-device.v1`）。
+- `saved`：設備儲存區的內容（`settingsStore` 保留一份副本；模擬設備寫入 `localStorage`，鍵為 `blink-assist.mock-device.v2`）。
 - `active`：設備實際執行中的設定（`deviceStore` 的 `active`，來自設備 snapshot）。
 
 流程固定是「編輯 → 儲存 → 套用」。儲存不會改變執行中的行為，套用才會。

@@ -18,7 +18,7 @@ const view = (bytes: number[]) => new DataView(Uint8Array.from(bytes).buffer);
 
 // 這組位元組同時寫在 docs/ble-protocol.md，是前端與韌體共同的對照基準。
 const DEFAULT_SETTINGS_BYTES = [
-  0x01, 0x01, 0xc0, 0x27, 0x09, 0x00, 0xf4, 0x01, 0x2c, 0x01, 0xf4, 0x01, 0x28, 0x05, 0xa4, 0x01,
+  0x01, 0x01, 0x88, 0x13, 0x00, 0x00, 0xf4, 0x01, 0x2c, 0x01, 0xf4, 0x01, 0x28, 0x05, 0xa4, 0x01,
   0x7f, 0xff, 0xff, 0x00,
 ];
 
@@ -33,7 +33,7 @@ describe('設定編解碼', () => {
 
   it('排程、星期與角度可以來回轉換', () => {
     const settings = cloneSettings(defaultSettings);
-    settings.dayMode = { ...settings.dayMode, enabled: false, intervalMs: 86_400_000 };
+    settings.dayMode = { ...settings.dayMode, enabled: false, intervalMs: 10_000 };
     settings.nightMode = {
       scheduleEnabled: true,
       startTime: '23:59',

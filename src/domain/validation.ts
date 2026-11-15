@@ -10,7 +10,7 @@ export interface Range {
  * 這些不是人體安全範圍；真實限制必須由韌體端決定。
  */
 export const DAY_LIMITS = {
-  intervalMs: { min: 1_000, max: 86_400_000 },
+  intervalMs: { min: 1_000, max: 10_000 },
   closeDurationMs: { min: 100, max: 10_000 },
   closedHoldMs: { min: 0, max: 10_000 },
   openDurationMs: { min: 100, max: 10_000 },

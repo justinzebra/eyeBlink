@@ -7,7 +7,7 @@ namespace blink {
 namespace {
 
 constexpr uint32_t INTERVAL_MIN_MS = 1000;
-constexpr uint32_t INTERVAL_MAX_MS = 86400000;
+constexpr uint32_t INTERVAL_MAX_MS = 10000;
 constexpr uint16_t MOVE_MIN_MS = 100;
 constexpr uint16_t DURATION_MAX_MS = 10000;
 
@@ -46,7 +46,7 @@ bool isValidAngle(uint8_t angle) {
 Settings defaultSettings() {
   Settings s;
   s.dayEnabled = true;
-  s.intervalMs = 600000;
+  s.intervalMs = 5000;
   s.closeDurationMs = 500;
   s.closedHoldMs = 300;
   s.openDurationMs = 500;

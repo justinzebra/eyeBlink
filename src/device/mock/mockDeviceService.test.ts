@@ -136,13 +136,13 @@ describe('MockDeviceService', () => {
       await save(
         device,
         withSettings((s) => {
-          s.dayMode.intervalMs = 120_000;
+          s.dayMode.intervalMs = 8_000;
         }),
       );
-      expect(device.snapshot().active.dayMode.intervalMs).toBe(600_000);
+      expect(device.snapshot().active.dayMode.intervalMs).toBe(5_000);
 
       await device.applySettings();
-      expect(device.snapshot().active.dayMode.intervalMs).toBe(120_000);
+      expect(device.snapshot().active.dayMode.intervalMs).toBe(8_000);
     });
 
     it('重新啟動捨棄未儲存的執行狀態，並載入持久化設定', async () => {
@@ -152,7 +152,7 @@ describe('MockDeviceService', () => {
       await save(
         device,
         withSettings((s) => {
-          s.dayMode.intervalMs = 120_000;
+          s.dayMode.intervalMs = 8_000;
         }),
       );
       await device.setManualNight(true);
@@ -161,10 +161,10 @@ describe('MockDeviceService', () => {
       await device.restart();
 
       expect(device.snapshot().status.mode).toBe('day');
-      expect(device.snapshot().active.dayMode.intervalMs).toBe(120_000);
+      expect(device.snapshot().active.dayMode.intervalMs).toBe(8_000);
       const another = createDevice(storage);
       await another.connect();
-      expect((await another.readSettings()).dayMode.intervalMs).toBe(120_000);
+      expect((await another.readSettings()).dayMode.intervalMs).toBe(8_000);
     });
 
     it('拒絕無效設定', async () => {
@@ -187,7 +187,7 @@ describe('MockDeviceService', () => {
 
       const pending = device.saveSettings(
         withSettings((s) => {
-          s.dayMode.intervalMs = 120_000;
+          s.dayMode.intervalMs = 8_000;
         }),
       );
       const assertion = expect(pending).rejects.toThrow('空間不足');
@@ -195,7 +195,7 @@ describe('MockDeviceService', () => {
       await assertion;
 
       expect(storage.getItem(STORAGE_KEY)).toBeNull();
-      expect((await device.readSettings()).dayMode.intervalMs).toBe(600_000);
+      expect((await device.readSettings()).dayMode.intervalMs).toBe(5_000);
     });
 
     it('儲存途中斷線時不寫入', async () => {
@@ -219,7 +219,7 @@ describe('MockDeviceService', () => {
       const settings = await device.readSettings();
       settings.dayMode.intervalMs = 1;
 
-      expect((await device.readSettings()).dayMode.intervalMs).toBe(600_000);
+      expect((await device.readSettings()).dayMode.intervalMs).toBe(5_000);
     });
   });
 
@@ -268,11 +268,11 @@ describe('MockDeviceService', () => {
       const device = createDevice();
       await device.connect();
 
-      await vi.advanceTimersByTimeAsync(600_000);
+      await vi.advanceTimersByTimeAsync(5_000);
       expect(device.snapshot().status.phase).toBe('closing');
       await vi.advanceTimersByTimeAsync(1300);
       expect(device.snapshot().status.phase).toBe('open');
-      await vi.advanceTimersByTimeAsync(598_700);
+      await vi.advanceTimersByTimeAsync(3_700);
       expect(device.snapshot().status.phase).toBe('closing');
     });
 
@@ -287,7 +287,7 @@ describe('MockDeviceService', () => {
       );
       await device.applySettings();
 
-      await vi.advanceTimersByTimeAsync(600_000);
+      await vi.advanceTimersByTimeAsync(5_000);
 
       expect(device.snapshot().status.phase).toBe('open');
       expect(device.snapshot().status.mode).toBe('idle');

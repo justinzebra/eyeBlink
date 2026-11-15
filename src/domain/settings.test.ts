@@ -19,7 +19,7 @@ describe('settings helpers', () => {
     const copy = cloneSettings(defaultSettings);
     copy.dayMode.intervalMs = 1234;
 
-    expect(defaultSettings.dayMode.intervalMs).toBe(600_000);
+    expect(defaultSettings.dayMode.intervalMs).toBe(5_000);
   });
 
   it('blinkDurationMs 為閉眼、停留、睜眼的總和', () => {

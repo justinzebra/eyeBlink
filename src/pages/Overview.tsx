@@ -6,7 +6,7 @@ import { useDeviceText } from '../hooks/useDeviceText';
 import { formatTime } from '../lib/formatTime';
 import { useDeviceStore } from '../stores';
 
-const MS_PER_MINUTE = 60_000;
+const MS_PER_SECOND = 1000;
 
 const SOURCE_DESCRIPTIONS: Record<ModeSource, string> = {
   manual: '手動夜間優先',
@@ -46,7 +46,7 @@ function ModeStats() {
         <Sun />
         <span>日間模式</span>
         <strong>{active.dayMode.enabled ? '已啟用' : '已停用'}</strong>
-        <small>每 {active.dayMode.intervalMs / MS_PER_MINUTE} 分鐘一次</small>
+        <small>每 {active.dayMode.intervalMs / MS_PER_SECOND} 秒一次</small>
       </div>
       <div className="card stat">
         <Moon />
