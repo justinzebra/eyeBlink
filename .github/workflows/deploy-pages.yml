@@ -1,0 +1,46 @@
+# 把前端打包後發佈到 GitHub Pages。
+# 需要先到 repo 的 Settings → Pages，把 Source 選成「GitHub Actions」。
+name: 發佈到 GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # 格式、ESLint、型別、測試任何一項沒過就不發佈。
+      - run: npm run check
+      # 網站位於 https://<帳號>.github.io/<repo 名稱>/，資源路徑要帶上 repo 名稱。
+      - run: npx vite build --base="/${{ github.event.repository.name }}/"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
