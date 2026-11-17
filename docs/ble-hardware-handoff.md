@@ -17,7 +17,7 @@
 | 專案               | `D:\eyeblink`                                                                    |
 | 分支               | `refactor/layered-architecture`                                                  |
 | 最近核對的提交     | `b8c206e`，新增 ESP32 韌體與藍牙實機控制                                         |
-| Arduino IDE        | 2.3.10，位於 `C:\Users\iyang\Arduino IDE`                                        |
+| Arduino IDE        | 2.3.10（安裝在使用者的家目錄下）                                                 |
 | Arduino CLI        | IDE 隨附的 `resources\app\lib\backend\resources\arduino-cli.exe`                 |
 | ESP32 核心         | Arduino-ESP32 3.3.12                                                             |
 | 晶片讀值           | ESP32-D0WD-V3，revision v3.1，4 MB Flash                                         |
@@ -120,13 +120,13 @@ Espressif 的 ESP32 Series Datasheet 在 Clocks and Timers 中明列 Wi-Fi／Blu
 
 以下檔案位於本機暫存區，可能被系統清除，不是專案執行依賴。
 
-| 位置                                                                                    | 內容                                                                          |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `%TEMP%\blink-assist-dio-2a9aa70b`                                                      | 原本韌體的 DIO／40 MHz Flash 組態建置產物，包含已刷回的 `BlinkAssist.ino.bin` |
-| `%TEMP%\blink-assist-diag-2a9aa70b\BlinkAssist`                                         | 加入序列訊息的診斷版副本                                                      |
-| `%TEMP%\blink-assist-diag-2a9aa70b\Capture-Startup.ps1`                                 | 重啟並擷取 COM3 訊息的腳本                                                    |
-| `%TEMP%\blink-assist-diag-2a9aa70b\startup-74880.bin`                                   | 診斷版可辨識輸出的原始位元組                                                  |
-| `%TEMP%\blink-assist-ble-2a9aa70b`                                                      | 以 `pip --target` 安裝的 Bleak 及臨時驗證腳本；腳本尚未通過設備探索階段       |
-| `C:\Users\iyang\.codex\attachments\5c2fc721-6fb0-4f17-915d-3d8d81bb0ef4\貼上的文字.txt` | 使用者貼上的成功燒錄紀錄                                                      |
+| 位置                                                    | 內容                                                                          |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `%TEMP%\blink-assist-dio-2a9aa70b`                      | 原本韌體的 DIO／40 MHz Flash 組態建置產物，包含已刷回的 `BlinkAssist.ino.bin` |
+| `%TEMP%\blink-assist-diag-2a9aa70b\BlinkAssist`         | 加入序列訊息的診斷版副本                                                      |
+| `%TEMP%\blink-assist-diag-2a9aa70b\Capture-Startup.ps1` | 重啟並擷取 COM3 訊息的腳本                                                    |
+| `%TEMP%\blink-assist-diag-2a9aa70b\startup-74880.bin`   | 診斷版可辨識輸出的原始位元組                                                  |
+| `%TEMP%\blink-assist-ble-2a9aa70b`                      | 以 `pip --target` 安裝的 Bleak 及臨時驗證腳本；腳本尚未通過設備探索階段       |
+| 使用者貼上的文字檔（未進版控）                          | 使用者貼上的成功燒錄紀錄                                                      |
 
 舊版 AGENTS.md 裡「沒有 Arduino IDE／CLI」及「尚未在板上執行」屬於本次調查之前的歷史狀態。現在已成功上傳並執行診斷韌體，但 BLE 實機連線及馬達功能仍未驗證。
