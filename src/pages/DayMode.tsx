@@ -38,7 +38,7 @@ function BlinkParameters() {
           {...INTERVAL_SECONDS}
           step={INTERVAL_STEP_SECONDS}
           onChange={(seconds) => patchDayMode({ intervalMs: Math.round(seconds * MS_PER_SECOND) })}
-          help="本次開始至下次開始的間隔"
+          help="本次眨完至下次開始，睜眼的時間"
         />
         <NumberField
           label="閉眼時間"

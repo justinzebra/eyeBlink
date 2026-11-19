@@ -171,10 +171,10 @@ describe('MockDeviceService', () => {
       const device = createDevice();
       await device.connect();
       const invalid = withSettings((s) => {
-        s.dayMode.intervalMs = 1000;
+        s.dayMode.intervalMs = 500;
       });
 
-      await expect(device.saveSettings(invalid)).rejects.toThrow('眨眼間隔');
+      await expect(device.saveSettings(invalid)).rejects.toThrow('日間時間超出');
     });
 
     it('寫入失敗時回報錯誤，且不覆蓋已儲存的值', async () => {
@@ -264,7 +264,7 @@ describe('MockDeviceService', () => {
       await expect(device.simulateBlink()).rejects.toThrow('進行中');
     });
 
-    it('自動眨眼以開始到開始計算間隔', async () => {
+    it('自動眨眼以眨完到下次開始計算間隔', async () => {
       const device = createDevice();
       await device.connect();
 
@@ -272,7 +272,20 @@ describe('MockDeviceService', () => {
       expect(device.snapshot().status.phase).toBe('closing');
       await vi.advanceTimersByTimeAsync(1300);
       expect(device.snapshot().status.phase).toBe('open');
-      await vi.advanceTimersByTimeAsync(3_700);
+      await vi.advanceTimersByTimeAsync(4_999);
+      expect(device.snapshot().status.phase).toBe('open');
+      await vi.advanceTimersByTimeAsync(1);
+      expect(device.snapshot().status.phase).toBe('closing');
+    });
+
+    it('手動眨眼後，下次自動眨眼從眨完起算一個間隔', async () => {
+      const device = createDevice();
+      await device.connect();
+
+      await device.simulateBlink();
+      await vi.advanceTimersByTimeAsync(1300 + 4_999);
+      expect(device.snapshot().status.phase).toBe('open');
+      await vi.advanceTimersByTimeAsync(1);
       expect(device.snapshot().status.phase).toBe('closing');
     });
 
@@ -372,7 +385,7 @@ describe('MockDeviceService', () => {
       await vi.advanceTimersByTimeAsync(900_000);
 
       await device.setManualNight(false);
-      await vi.advanceTimersByTimeAsync(599_999);
+      await vi.advanceTimersByTimeAsync(4_999);
       expect(device.snapshot().status.phase).toBe('open');
       await vi.advanceTimersByTimeAsync(1);
       expect(device.snapshot().status.phase).toBe('closing');

@@ -38,16 +38,11 @@ function isTime(value: unknown): value is string {
 function validateDayMode(day: unknown): string[] {
   if (!isRecord(day) || typeof day.enabled !== 'boolean') return ['日間模式格式不正確'];
 
-  const errors: string[] = [];
   const timings = Object.entries(DAY_LIMITS).map(([key, range]) =>
     isIntegerInRange(day[key], range) ? day[key] : null,
   );
-  if (timings.includes(null)) errors.push('日間時間超出模擬範圍或不是整數');
-
-  const { intervalMs, closeDurationMs, closedHoldMs, openDurationMs } = day;
-  const total = Number(closeDurationMs) + Number(closedHoldMs) + Number(openDurationMs);
-  if (Number(intervalMs) < total) errors.push('眨眼間隔不可短於完整眨眼時間');
-  return errors;
+  // 間隔從眨完起算，與眨眼本身的長度無關，所以兩者之間沒有額外限制。
+  return timings.includes(null) ? ['日間時間超出模擬範圍或不是整數'] : [];
 }
 
 function validateNightMode(night: unknown): string[] {

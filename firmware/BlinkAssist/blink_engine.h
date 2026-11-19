@@ -32,7 +32,7 @@ class BlinkEngine {
   // 手動夜間：即時指令，不儲存。開啟期間優先於自動排程。
   void setManualNight(bool enabled, uint64_t nowMs);
 
-  // 立即眨眼一次。夜間或眨眼進行中會被拒絕。
+  // 立即眨眼一次，下次自動眨眼從這次眨完起算一個間隔。夜間或眨眼進行中會被拒絕。
   BlinkRequest requestBlink(uint64_t nowMs);
 
   // 把狀態推進到現在。每圈主迴圈呼叫一次。
@@ -46,6 +46,7 @@ class BlinkEngine {
   uint32_t msUntilNextBlink(uint64_t nowMs) const;
 
  private:
+  uint64_t cycleMs() const;
   void restartTimeline(uint64_t nowMs);
   Pose poseAt(uint64_t nowMs) const;
 

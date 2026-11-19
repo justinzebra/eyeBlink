@@ -16,7 +16,7 @@ constexpr uint16_t MINUTES_PER_DAY = 1440;
 struct Settings {
   // 日間眨眼
   bool dayEnabled;
-  uint32_t intervalMs;       // 這次開始到下次開始
+  uint32_t intervalMs;       // 這次眨完到下次開始（睜眼的時間）
   uint16_t closeDurationMs;
   uint16_t closedHoldMs;
   uint16_t openDurationMs;
@@ -35,7 +35,7 @@ enum class SettingsError : uint8_t {
   None = 0,
   Version = 1,
   DayTiming = 2,
-  IntervalTooShort = 3,
+  // 3 已停用（原為「間隔短於完整眨眼時間」）；間隔改從眨完起算後不再有這個限制。
   ScheduleTime = 4,
   ScheduleIncomplete = 5,
   Angle = 6,

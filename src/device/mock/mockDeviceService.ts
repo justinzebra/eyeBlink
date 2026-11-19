@@ -130,7 +130,7 @@ export class MockDeviceService implements SimulatedDeviceService {
     if (this.modeSource(now) !== 'day') throw new Error('請先解除夜間模式再模擬眨眼');
     const timeline = this.syncTimeline(now);
     if (timeline !== null && timeline.blinkStart !== null) throw new Error('眨眼循環進行中');
-    this.timeline = startBlink(now, this.active.dayMode.intervalMs);
+    this.timeline = startBlink(now, this.active.dayMode);
     this.notify();
   }
 

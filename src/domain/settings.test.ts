@@ -80,11 +80,11 @@ describe('validateSettings', () => {
     expect(validateSettings(notNumber)).toContain('日間時間超出模擬範圍或不是整數');
   });
 
-  it('拒絕短於完整眨眼時間的間隔', () => {
+  it('接受短於完整眨眼時間的間隔，因為間隔從眨完起算', () => {
     const settings = cloneSettings(defaultSettings);
     settings.dayMode.intervalMs = 1000;
 
-    expect(validateSettings(settings)).toEqual(['眨眼間隔不可短於完整眨眼時間']);
+    expect(validateSettings(settings)).toEqual([]);
   });
 
   it('拒絕錯誤的時間格式、星期與重複星期', () => {

@@ -6,7 +6,7 @@ import type { DeviceMode, ModeSource } from '../types';
 // 必須與韌體 firmware/BlinkAssist/protocol.h、settings.cpp 以及
 // docs/ble-protocol.md 保持一致；三者任何一處修改都要同步另外兩處。
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 
 export const BLE_UUIDS = {
   service: '12345678-1234-1234-1234-123456789000',
@@ -83,7 +83,6 @@ const PHASES: readonly BlinkPhase[] = ['open', 'closing', 'hold', 'opening'];
 const SETTINGS_ERRORS: Record<number, string> = {
   1: '不支援的設定版本',
   2: '日間時間超出設備允許範圍',
-  3: '眨眼間隔不可短於完整眨眼時間',
   4: '夜間排程時間或星期格式不正確',
   5: '排程需選擇星期，且開始與結束時間不可相同',
   6: '閉眼角度超出設備允許的上限',

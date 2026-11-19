@@ -11,7 +11,7 @@ constexpr char DEVICE_NAME[] = "BlinkAssist";
 
 // 韌體版本，會回報給前端顯示。
 constexpr uint8_t FIRMWARE_VERSION_MAJOR = 1;
-constexpr uint8_t FIRMWARE_VERSION_MINOR = 0;
+constexpr uint8_t FIRMWARE_VERSION_MINOR = 1;
 
 // ---- 主晶振頻率（MHz）----
 // Arduino-ESP32 3.x 一律假設主晶振是 40 MHz。少數開發板用的是 26 MHz，

@@ -71,7 +71,6 @@ SettingsError validateSettings(const Settings& s) {
       s.closedHoldMs <= DURATION_MAX_MS &&
       s.openDurationMs >= MOVE_MIN_MS && s.openDurationMs <= DURATION_MAX_MS;
   if (!timingInRange) return SettingsError::DayTiming;
-  if (s.intervalMs < blinkDurationMs(s)) return SettingsError::IntervalTooShort;
 
   if (s.startMinutes >= MINUTES_PER_DAY || s.endMinutes >= MINUTES_PER_DAY ||
       (s.weekdays & ~WEEKDAY_MASK) != 0) {

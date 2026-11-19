@@ -12,21 +12,26 @@ export interface BlinkPose {
 export interface BlinkTimeline {
   /** 進行中的眨眼開始時間；沒有眨眼時為 `null`。 */
   blinkStart: number | null;
-  /** 下一次自動眨眼的開始時間。 */
+  /** 下一次自動眨眼的開始時間。間隔從上一次眨眼「結束」起算。 */
   nextBlinkAt: number;
 }
 
 export const OPEN_POSE: BlinkPose = { phase: 'open', progress: 0 };
 export const CLOSED_POSE: BlinkPose = { phase: 'hold', progress: 1 };
 
+/** 一次循環的長度：完整眨眼加上眨完後的睜眼間隔。 */
+function cycleMs(day: DayModeSettings): number {
+  return blinkDurationMs(day) + day.intervalMs;
+}
+
 /** 從 `now` 重新起算間隔，並取消進行中的眨眼。 */
 export function restartTimeline(now: number, intervalMs: number): BlinkTimeline {
   return { blinkStart: null, nextBlinkAt: now + intervalMs };
 }
 
-/** 立即開始一次眨眼，下次自動眨眼從這次開始起算。 */
-export function startBlink(now: number, intervalMs: number): BlinkTimeline {
-  return { blinkStart: now, nextBlinkAt: now + intervalMs };
+/** 立即開始一次眨眼，下次自動眨眼從這次眨完起算一個間隔。 */
+export function startBlink(now: number, day: DayModeSettings): BlinkTimeline {
+  return { blinkStart: now, nextBlinkAt: now + cycleMs(day) };
 }
 
 function clearFinishedBlink(
@@ -42,10 +47,11 @@ function clearFinishedBlink(
 function startDueBlink(timeline: BlinkTimeline, day: DayModeSettings, now: number): BlinkTimeline {
   const isDue = timeline.blinkStart === null && day.enabled && now >= timeline.nextBlinkAt;
   if (!isDue) return timeline;
-  // 分頁被背景節流時可能一次跳過多個間隔：對齊到最近一次應開始的時間，不補播。
-  const missedIntervals = Math.floor((now - timeline.nextBlinkAt) / day.intervalMs);
-  const blinkStart = timeline.nextBlinkAt + missedIntervals * day.intervalMs;
-  return { blinkStart, nextBlinkAt: blinkStart + day.intervalMs };
+  // 分頁被背景節流時可能一次跳過多個循環：對齊到最近一次應開始的時間，不補播。
+  const cycle = cycleMs(day);
+  const missedCycles = Math.floor((now - timeline.nextBlinkAt) / cycle);
+  const blinkStart = timeline.nextBlinkAt + missedCycles * cycle;
+  return { blinkStart, nextBlinkAt: blinkStart + cycle };
 }
 
 /**

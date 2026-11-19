@@ -6,7 +6,7 @@ export type MotorSide = (typeof MOTOR_SIDES)[number];
 /** 時間單位一律為毫秒。 */
 export interface DayModeSettings {
   enabled: boolean;
-  /** 本次眨眼開始到下次眨眼開始的間隔。 */
+  /** 本次眨眼結束到下次眨眼開始的間隔，也就是兩次眨眼之間睜眼的時間。 */
   intervalMs: number;
   closeDurationMs: number;
   closedHoldMs: number;

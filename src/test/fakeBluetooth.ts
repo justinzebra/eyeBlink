@@ -1,4 +1,4 @@
-import { BLE_UUIDS, ResultCode } from '../device/ble/protocol';
+import { BLE_UUIDS, PROTOCOL_VERSION, ResultCode } from '../device/ble/protocol';
 
 /** 測試用的假 ESP32：以最少的行為模擬韌體的 GATT 服務。 */
 
@@ -40,7 +40,7 @@ export interface FakeStatusOptions {
 }
 
 export function statusBytes({
-  protocolVersion = 1,
+  protocolVersion = PROTOCOL_VERSION,
   flags = 0x41,
   progress = 0,
   leftAngle = 0xff,

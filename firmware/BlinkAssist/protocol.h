@@ -8,7 +8,8 @@
 namespace blink {
 namespace protocol {
 
-constexpr uint8_t PROTOCOL_VERSION = 1;
+// 版本 2：眨眼間隔改為「這次眨完到下次開始」。
+constexpr uint8_t PROTOCOL_VERSION = 2;
 
 constexpr char SERVICE_UUID[] = "12345678-1234-1234-1234-123456789000";
 constexpr char SAVED_SETTINGS_UUID[] = "12345678-1234-1234-1234-123456789001";   // READ

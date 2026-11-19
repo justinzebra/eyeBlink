@@ -86,7 +86,7 @@ domain  ←  device  ←  stores  ←  hooks / components / pages / app
 
 **排程的星期是「開始日」。** 週一 22:00 至週二 07:00 屬於週一。判斷含開始、不含結束。
 
-**眨眼靠時間推算，不靠計時器累加。** `domain/blinkTimeline.ts` 以純函式從時間軸算出姿態，所以分頁被背景節流也不會走樣；錯過的眨眼不補播。間隔定義是「這次開始到下次開始」。
+**眨眼靠時間推算，不靠計時器累加。** `domain/blinkTimeline.ts` 以純函式從時間軸算出姿態，所以分頁被背景節流也不會走樣；錯過的眨眼不補播。間隔定義是「這次眨完到下次開始」（睜眼的時間）；兩次眨眼開始的時間差是完整眨眼時間加上間隔，所以間隔可以短於一次眨眼。
 
 **模擬設備的 `snapshot()` 會先把時鐘推進到現在再回傳。** 這是刻意的設計，不是疏忽。UI 以 `useDeviceClock` 每 50ms 呼叫一次 `tick()`；`deviceStore` 在狀態沒變時不會更新，避免整頁無謂重繪。`status.now` 只精確到秒也是為了這個。
 
@@ -147,8 +147,9 @@ domain  ←  device  ←  stores  ←  hooks / components / pages / app
 
 ## 9. 目前版本狀態
 
-- 分支 `refactor/layered-architecture`，尚未合併回 `main`。
-- 前端：`npm run check` 全過（127 個測試）；模擬與實機兩種模式的介面都以瀏覽器實際操作確認過，Chrome 已實測連上 ESP32。
+- `main` 與 `refactor/layered-architecture` 同步；推上 `main` 會自動發佈到 GitHub Pages（https://justinzebra.github.io/eyeBlink/）。
+- 藍牙協議為版本 2、韌體 1.1（眨眼間隔改為眨完起算）。**這版韌體尚未編譯與上板驗證**；板子上若還是韌體 1.0，前端會以「協議版本不一致」拒絕連線，需重新燒錄。
+- 前端：`npm run check` 全過（130 個測試）；模擬與實機兩種模式的介面都以瀏覽器實際操作確認過，Chrome 已實測連上 ESP32。
 - 韌體：以 Arduino-ESP32 3.3.12、開發板 ESP32 Dev Module 編譯通過（約 1.09 MB，佔預設分割區 83%，還有空間但不多；加功能前留意大小）。
 - 下一步可依伺服角度調查報告比對回報角度與實體行程。根據複驗結果決定是否需要調整。
 

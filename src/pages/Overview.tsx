@@ -46,7 +46,7 @@ function ModeStats() {
         <Sun />
         <span>日間模式</span>
         <strong>{active.dayMode.enabled ? '已啟用' : '已停用'}</strong>
-        <small>每 {active.dayMode.intervalMs / MS_PER_SECOND} 秒一次</small>
+        <small>眨完後間隔 {active.dayMode.intervalMs / MS_PER_SECOND} 秒</small>
       </div>
       <div className="card stat">
         <Moon />

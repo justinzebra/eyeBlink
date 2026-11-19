@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cloneSettings, defaultSettings, type BlinkSettings } from '../../domain/settings';
 import { FakeEsp32 } from '../../test/fakeBluetooth';
 import { BleDeviceService } from './bleDeviceService';
-import { Opcode, ResultCode, encodeSettings, toLocalEpochSeconds } from './protocol';
+import {
+  Opcode,
+  PROTOCOL_VERSION,
+  ResultCode,
+  encodeSettings,
+  toLocalEpochSeconds,
+} from './protocol';
 
 const NOW = new Date(2026, 10, 9, 12, 0, 0);
 const COMMAND_TIMEOUT_MS = 5000;
@@ -74,7 +80,7 @@ describe('BleDeviceService', () => {
 
     it('韌體協議版本不一致時拒絕連線', async () => {
       const { esp32, service } = setup();
-      esp32.setStatus({ protocolVersion: 2 });
+      esp32.setStatus({ protocolVersion: PROTOCOL_VERSION + 1 });
 
       await expect(service.connect()).rejects.toThrow('通訊協議版本');
       expect(service.snapshot().status.connected).toBe(false);
@@ -165,10 +171,10 @@ describe('BleDeviceService', () => {
       const { service, opcodes } = setup();
       await service.connect();
       const invalid = withSettings((s) => {
-        s.dayMode.intervalMs = 1000;
+        s.dayMode.intervalMs = 500;
       });
 
-      await expect(service.saveSettings(invalid)).rejects.toThrow('眨眼間隔');
+      await expect(service.saveSettings(invalid)).rejects.toThrow('日間時間超出');
       expect(opcodes()).not.toContain(Opcode.saveSettings);
     });
 

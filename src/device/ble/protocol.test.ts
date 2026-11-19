@@ -58,13 +58,13 @@ describe('設定編解碼', () => {
 
 describe('狀態解碼', () => {
   // flags = 0x61：mode day(1) | source day(0) | phase hold(2<<4) | 已對時(0x40)
-  const status = [1, 1, 0, 0x61, 0xff, 30, 0xff, 0, 0, 0, 0, 0, 0xe8, 0x03, 0, 0];
+  const status = [2, 1, 0, 0x61, 0xff, 30, 0xff, 0, 0, 0, 0, 0, 0xe8, 0x03, 0, 0];
 
   it('解出模式、階段、進度與角度', () => {
     const decoded = decodeStatus(view(status));
 
     expect(decoded).toMatchObject({
-      protocolVersion: 1,
+      protocolVersion: 2,
       firmwareVersion: '1.0',
       mode: 'day',
       source: 'day',

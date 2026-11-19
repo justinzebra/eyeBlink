@@ -42,7 +42,7 @@ BlinkRequest BlinkEngine::requestBlink(uint64_t nowMs) {
   if (blinking_) return BlinkRequest::InProgress;
   blinking_ = true;
   blinkStartMs_ = nowMs;
-  nextBlinkAtMs_ = nowMs + settings_.intervalMs;
+  nextBlinkAtMs_ = nowMs + cycleMs();
   pose_ = poseAt(nowMs);
   return BlinkRequest::Started;
 }
@@ -67,9 +67,10 @@ void BlinkEngine::update(uint64_t nowMs, const LocalTime& time) {
 
   if (!blinking_ && settings_.dayEnabled && nowMs >= nextBlinkAtMs_) {
     // 正常情況下 missed 為 0；若主迴圈被長時間卡住，對齊到最近一次應開始的時間，不補播。
-    const uint64_t missed = (nowMs - nextBlinkAtMs_) / settings_.intervalMs;
-    blinkStartMs_ = nextBlinkAtMs_ + missed * settings_.intervalMs;
-    nextBlinkAtMs_ = blinkStartMs_ + settings_.intervalMs;
+    const uint64_t cycle = cycleMs();
+    const uint64_t missed = (nowMs - nextBlinkAtMs_) / cycle;
+    blinkStartMs_ = nextBlinkAtMs_ + missed * cycle;
+    nextBlinkAtMs_ = blinkStartMs_ + cycle;
     blinking_ = nowMs - blinkStartMs_ < blinkDurationMs(settings_);
   }
 
@@ -85,6 +86,11 @@ uint32_t BlinkEngine::msUntilNextBlink(uint64_t nowMs) const {
   if (source_ != Source::Day || !settings_.dayEnabled) return protocol::NO_NEXT_BLINK;
   if (nextBlinkAtMs_ <= nowMs) return 0;
   return static_cast<uint32_t>(nextBlinkAtMs_ - nowMs);
+}
+
+// 一次循環的長度：完整眨眼加上眨完後的睜眼間隔。
+uint64_t BlinkEngine::cycleMs() const {
+  return static_cast<uint64_t>(blinkDurationMs(settings_)) + settings_.intervalMs;
 }
 
 void BlinkEngine::restartTimeline(uint64_t nowMs) {
